@@ -1,0 +1,48 @@
+# Blender 4.1.0 MTL File: 'custom.blend'
+# www.blender.org
+
+newmtl bacik
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd /Users/angelina/Desktop/textuers3/bacik_BaseColor.png
+map_Ns /Users/angelina/Desktop/textuers3/bacik_Roughness.png
+map_refl /Users/angelina/Desktop/textuers3/bacik_Metallic.png
+map_Bump -bm 1.000000 /Users/angelina/Desktop/textuers3/bacik_Normal.png
+
+newmtl bacik.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd /Users/angelina/Desktop/textures/taban_BaseColor.png
+map_Ns /Users/angelina/Desktop/textures/taban_Roughness.png
+map_refl /Users/angelina/Desktop/textures/taban_Metallic.png
+map_Bump -bm 1.000000 /Users/angelina/Desktop/textures/taban_Normal.png
+
+newmtl clay
+Ns 51.652905
+Ka 1.000000 1.000000 1.000000
+Kd 0.467194 0.467194 0.467194
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl govde
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd /Users/angelina/Desktop/textuers3/govde_BaseColor.png
+map_Ns /Users/angelina/Desktop/textuers3/govde_Roughness.png
+map_refl /Users/angelina/Desktop/textuers3/govde_Metallic.png
+map_Bump -bm 1.000000 /Users/angelina/Desktop/textuers3/govde_Normal.png
