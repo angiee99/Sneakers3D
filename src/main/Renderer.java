@@ -11,6 +11,8 @@ import java.util.Optional;
 import static global.GluUtils.gluLookAt;
 import static global.GluUtils.gluPerspective;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+
 
 /**
  * Simple scene rendering
@@ -21,6 +23,8 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public class Renderer extends AbstractRenderer {
     private List<Object3D> scene;
+    private int VBOVertices;
+    private int VBOIndices;
 
     public Renderer() {
         super();
@@ -65,6 +69,10 @@ public class Renderer extends AbstractRenderer {
         result.ifPresent(object3DS -> scene = object3DS);
 
         glEnable(GL_DEPTH_TEST);
+
+
+
+
     }
 
 
@@ -85,6 +93,32 @@ public class Renderer extends AbstractRenderer {
                 0, 0, 1);
         glPushMatrix();
 
+
+        for (Object3D object : scene){
+
+            int[] temp = new int[2];
+            glGenBuffers(temp);
+
+            VBOVertices = temp[0];
+            glBindBuffer(GL_ARRAY_BUFFER, VBOVertices);
+            glBufferData(GL_ARRAY_BUFFER, object.getVertices(), GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0); //?
+
+            VBOIndices = temp[1];
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, object.getIndices(), GL_STATIC_DRAW);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //?
+
+            glEnableClientState(GL_VERTEX_ARRAY);
+
+            glBindBuffer(GL_ARRAY_BUFFER, VBOVertices);
+            glVertexPointer(3, GL_FLOAT, 0, 0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
+            glDrawArrays(GL_TRIANGLES, 0, object.getIndices().capacity());
+
+            glDisableClientState(GL_VERTEX_ARRAY);
+
+        }
         
     }
 
