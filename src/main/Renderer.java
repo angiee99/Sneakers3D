@@ -65,17 +65,55 @@ public class Renderer extends AbstractRenderer {
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
                             else
-                                deltaTrans *= 1.02;
+                                deltaTrans *= 1.01;
                             break;
+
                         case GLFW_KEY_S:
                             pz += trans;
                             camera.backward(trans);
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
                             else
-                                deltaTrans *= 1.02;
+                                deltaTrans *= 1.01;
                             break;
 
+                        case GLFW_KEY_A:
+                            px -= trans;
+                            camera.left(trans);
+                            if (deltaTrans < 0.001f)
+                                deltaTrans = 0.001f;
+                            else
+                                deltaTrans *= 1.01;
+                            break;
+
+                        case GLFW_KEY_D:
+                            px += trans;
+                            camera.right(trans);
+                            if (deltaTrans < 0.001f)
+                                deltaTrans = 0.001f;
+                            else
+                                deltaTrans *= 1.01;
+                            break;
+                        case GLFW_KEY_LEFT_SHIFT:
+
+                            py -= trans;
+                            camera.up(trans);
+                            if (deltaTrans < 0.001f)
+                                deltaTrans = 0.001f;
+                            else
+                                deltaTrans *= 1.01;
+                            break;
+
+                        case GLFW_KEY_LEFT_CONTROL:
+
+                            py += trans;
+
+                            camera.down(trans);
+                            if (deltaTrans < 0.001f)
+                                deltaTrans = 0.001f;
+                            else
+                                deltaTrans *= 1.01;
+                            break;
                     }
                 }
             }
