@@ -107,7 +107,6 @@ public class Renderer extends AbstractRenderer {
                         case GLFW_KEY_LEFT_CONTROL:
 
                             py += trans;
-
                             camera.down(trans);
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
@@ -159,6 +158,9 @@ public class Renderer extends AbstractRenderer {
         glEnable(GL_DEPTH_TEST);
 
         camera = new GLCamera();
+        // setup initial position
+        pz = 2;
+        py = 0.3f;
     }
 
 
