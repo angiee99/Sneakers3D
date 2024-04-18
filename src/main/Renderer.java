@@ -2,8 +2,10 @@ package main;
 
 import global.AbstractRenderer;
 import global.GLCamera;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 
+import java.nio.DoubleBuffer;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,11 +33,15 @@ public class Renderer extends AbstractRenderer {
     private float px, py, pz;
     private double ex, ey, ez;
     private float zenit, azimut;
-
+    private float[] modelMatrix = new float[16];
+    private boolean mouseButton1 = false;
+    private float dx, dy, ox, oy;
 
 
     public Renderer() {
         super();
+        width = width*2;
+        height = height*2;
 
         glfwWindowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
@@ -78,7 +84,7 @@ public class Renderer extends AbstractRenderer {
                             break;
 
                         case GLFW_KEY_A:
-                            px -= trans;
+                            px += trans;
                             camera.left(trans);
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
@@ -87,7 +93,7 @@ public class Renderer extends AbstractRenderer {
                             break;
 
                         case GLFW_KEY_D:
-                            px += trans;
+                            px -= trans;
                             camera.right(trans);
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
@@ -118,21 +124,47 @@ public class Renderer extends AbstractRenderer {
             }
         };
 
-        /*used default glfwKeyCallback */
+
         glfwMouseButtonCallback = new GLFWMouseButtonCallback() {
 
             @Override
             public void invoke(long window, int button, int action, int mods) {
+                DoubleBuffer xBuffer = BufferUtils.createDoubleBuffer(1);
+                DoubleBuffer yBuffer = BufferUtils.createDoubleBuffer(1);
+                glfwGetCursorPos(window, xBuffer, yBuffer);
+                double x = xBuffer.get(0);
+                double y = yBuffer.get(0);
 
+                mouseButton1 = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+
+                if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS) {
+                    ox = (float) x;
+                    oy = (float) y;
+                }
             }
 
         };
 
-
         glfwCursorPosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double x, double y) {
-
+                if (mouseButton1) {
+                    dx = (float) x - ox;
+                    dy = (float) y - oy;
+                    ox = (float) x;
+                    oy = (float) y;
+                    zenit -= dy / width * 180;
+                    if (zenit > 90)
+                        zenit = 90;
+                    if (zenit <= -90)
+                        zenit = -90;
+                    azimut += dx / height * 180;
+                    azimut = azimut % 360;
+                    camera.setAzimuth(Math.toRadians(azimut));
+                    camera.setZenith(Math.toRadians(zenit));
+                    dx = 0;
+                    dy = 0;
+                }
             }
         };
 
@@ -166,9 +198,10 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void display() {
-        glViewport(0, 0, width*2, height*2); // *2 only for MacOS
+        glViewport(0, 0, width, height); // *2 only for MacOS
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
+        // calculate the view parameters
         trans += deltaTrans;
 
         double a_rad = azimut * Math.PI / 180;
@@ -187,7 +220,16 @@ public class Renderer extends AbstractRenderer {
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
-        gluLookAt(px, py, pz, ex + px, ey + py, ez + pz, ux, uy, uz);
+        glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
+        glLoadIdentity();
+
+        glRotatef(-zenit, 1.0f, 0, 0);
+        glRotatef(azimut, 0, 1.0f, 0);
+        glTranslated(-px, -py, -pz);
+        glMultMatrixf(modelMatrix);
+
+
+//        gluLookAt(px, py, pz, ex + px, ey + py, ez + pz, ux, uy, uz);
 //        gluLookAt(1.5, -0.5, 1.0,
 //                0, 0, 0,
 //                0, 1, 0);
