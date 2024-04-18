@@ -171,7 +171,23 @@ public class Renderer extends AbstractRenderer {
         glfwScrollCallback = new GLFWScrollCallback() {
             @Override
             public void invoke(long window, double dx, double dy) {
-                camera.forward(0.1);
+                if(dy < 0){
+                    pz -= trans;
+                    camera.forward(trans);
+                    if (deltaTrans < 0.001f)
+                        deltaTrans = 0.001f;
+                    else
+                        deltaTrans *= 1.01;
+                }
+                else {
+                    pz += trans;
+                    camera.backward(trans);
+                    if (deltaTrans < 0.001f)
+                        deltaTrans = 0.001f;
+                    else
+                        deltaTrans *= 1.01;
+                }
+
             }
         };
     }
