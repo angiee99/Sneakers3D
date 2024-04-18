@@ -2,9 +2,11 @@ package main;
 
 import global.AbstractRenderer;
 import global.GLCamera;
+import lwjglutils.OGLTexture2D;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 
+import java.io.IOException;
 import java.nio.DoubleBuffer;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +16,8 @@ import static global.GluUtils.gluPerspective;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
+//import static org.lwjgl.opengl.GL31C.GL_TEXTURE_BUFFER;
+//import static org.lwjgl.stb.STBImage.stbi_image_free;
 
 
 /**
@@ -31,7 +35,6 @@ public class Renderer extends AbstractRenderer {
     private GLCamera camera;
     private float trans, deltaTrans = 0;
     private float px, py, pz;
-    private double ex, ey, ez;
     private float zenit, azimut;
     private float[] modelMatrix = new float[16];
     private boolean mouseButton1 = false;
@@ -220,14 +223,6 @@ public class Renderer extends AbstractRenderer {
         // calculate the view parameters
         trans += deltaTrans;
 
-        double a_rad = azimut * Math.PI / 180;
-        double z_rad = zenit * Math.PI / 180;
-        ex = Math.sin(a_rad) * Math.cos(z_rad);
-        ey = Math.sin(z_rad);
-        ez = -Math.cos(a_rad) * Math.cos(z_rad);
-        double ux = Math.sin(a_rad) * Math.cos(z_rad + Math.PI / 2);
-        double uy = Math.sin(z_rad + Math.PI / 2);
-        double uz = -Math.cos(a_rad) * Math.cos(z_rad + Math.PI / 2);
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
@@ -244,17 +239,14 @@ public class Renderer extends AbstractRenderer {
         glTranslated(-px, -py, -pz);
         glMultMatrixf(modelMatrix);
 
-
-//        gluLookAt(px, py, pz, ex + px, ey + py, ez + pz, ux, uy, uz);
-//        gluLookAt(1.5, -0.5, 1.0,
-//                0, 0, 0,
-//                0, 1, 0);
         glPushMatrix();
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
         for (Object3D object : scene){
 
-            int[] temp = new int[2];
+            int[] temp = new int[4];
+            int VBONorm, VBOTextures;
             glGenBuffers(temp);
 
             VBOVertices = temp[0];
@@ -267,17 +259,36 @@ public class Renderer extends AbstractRenderer {
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, object.getIndices(), GL_STATIC_DRAW);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //?
 
+//            VBONorm = temp[2];
+//            glBindBuffer(GL_ARRAY_BUFFER, VBONorm);
+//            glBufferData(GL_ARRAY_BUFFER, object.getNormals(), GL_STATIC_DRAW);
+//            glBindBuffer(GL_ARRAY_BUFFER, 0); //?
+//
+//            VBOTextures = temp[3];
+//            glBindBuffer(GL_ARRAY_BUFFER, VBOTextures);
+//            glBufferData(GL_ARRAY_BUFFER, object.getTexCoords(), GL_STATIC_DRAW);
+//            glBindBuffer(GL_ARRAY_BUFFER, 0); //?
+
+
+
             glEnableClientState(GL_VERTEX_ARRAY);
+//            glEnableClientState(GL_NORMAL_ARRAY);
+//            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+                glBindBuffer(GL_ARRAY_BUFFER, VBOVertices);
+                glVertexPointer(3, GL_FLOAT, 0, VBOVertices);
+//
+//                glBindBuffer(GL_ARRAY_BUFFER, VBONorm);
+//                glNormalPointer(GL_FLOAT, 0, 0);
+//
+//                glBindBuffer(GL_TEXTURE_BUFFER, VBOTextures);
+//                glTexCoordPointer(3, GL_FLOAT, 0, 0);
 
-            glBindBuffer(GL_ARRAY_BUFFER, VBOVertices);
-            glVertexPointer(3, GL_FLOAT, 0, 0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
-            glDrawArrays(GL_TRIANGLES, 0, object.getIndices().capacity());
-
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
+                glDrawArrays(GL_TRIANGLES, 0, object.getIndices().capacity());
             glDisableClientState(GL_VERTEX_ARRAY);
-
+//            glDisableClientState(GL_NORMAL_ARRAY);
+//            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         }
-        
     }
 
 }
