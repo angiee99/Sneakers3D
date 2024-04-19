@@ -13,18 +13,18 @@ import static org.lwjgl.opengl.GL15.*;
 public class OBJLoader {
     private int vboId, vaoIdOBJ;
     OGLTexture2D texture;
-    public OGLModelOBJ loadObject(String filename){
+    public OGLModelOBJ loadObject(String filename, int pointer){
 
 
         OGLModelOBJ model= new OGLModelOBJ(filename);
 
         vaoIdOBJ = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vboId);
+        glBindBuffer(GL_ARRAY_BUFFER, pointer);
 
         FloatBuffer fb = model.getVerticesBuffer();
         if (fb != null) {
-            vboId = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, vboId);
+            pointer = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, pointer);
             fb.rewind();
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
             glVertexPointer(4, GL_FLOAT, 0, 0);
@@ -40,8 +40,8 @@ public class OBJLoader {
 //        }
         fb = model.getTexCoordsBuffer();
         if (fb != null) {
-            vboId = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, vboId);
+            pointer = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, pointer);
             fb.rewind();
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
             glTexCoordPointer(2, GL_FLOAT, 2 * 4, 0);

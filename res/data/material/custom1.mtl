@@ -1,0 +1,14 @@
+# Blender 4.1.0 MTL File: 'custom.blend'
+# www.blender.org
+
+newmtl govde
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textuers3/govde_BaseColor.png
+map_Ns textuers3/govde_Roughness.png
+map_refl textuers3/govde_Metallic.png
+map_Bump -bm 1.000000 textuers3/govde_Normal.png

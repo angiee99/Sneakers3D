@@ -16,6 +16,7 @@ import static global.GluUtils.gluPerspective;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 //import static org.lwjgl.opengl.GL31C.GL_TEXTURE_BUFFER;
 //import static org.lwjgl.stb.STBImage.stbi_image_free;
 
@@ -45,6 +46,8 @@ public class Renderer extends AbstractRenderer {
     OGLModelOBJ model;
     OGLTexture2D texture;
     private final int[] textureID = new int[3];
+    private int vboId1, vboId2, vboId3;
+    private int[] vboIdList = new int[3];
 
 
     public Renderer() {
@@ -215,9 +218,10 @@ public class Renderer extends AbstractRenderer {
         scene = new ArrayList<>();
         textures = new ArrayList<>();
 
-        scene.add(new OBJLoader().loadObject("/data/obj/custom.obj"));
-//        scene.add(new OBJLoader().loadObject("/data/obj/custom2.obj"));
-//        scene.add(new OBJLoader().loadObject("/data/obj/custom3.obj"));
+
+        scene.add(new OBJLoader().loadObject("/data/obj/custom2.obj", vboIdList[1]));
+        scene.add(new OBJLoader().loadObject("/data/obj/custom3.obj", vboIdList[2]));
+        scene.add(new OBJLoader().loadObject("/data/obj/custom1.obj", vboIdList[0]));
 
         textureID[0] = glGenTextures();
 
@@ -258,27 +262,25 @@ public class Renderer extends AbstractRenderer {
         glPushMatrix();
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        glEnableClientState(GL_VERTEX_ARRAY);
         for(int i = 0; i < scene.size(); i++){
-            glBindBuffer(GL_ARRAY_BUFFER, vboId);
-            glEnableClientState(GL_VERTEX_ARRAY);
+            glBindBuffer(GL_ARRAY_BUFFER, vboIdList[i]);
 //            glEnableClientState(GL_COLOR_ARRAY);
-
 
             glEnable(GL_TEXTURE_2D);
             texture.bind();
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
             glDrawArrays(scene.get(i).getTopology(), 0,
                     scene.get(i).getVerticesBuffer().limit());
-            glDisableClientState(GL_COLOR_ARRAY);
-            glDisableClientState(GL_VERTEX_ARRAY);
-
-//            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-//
-//            glDisable(GL_TEXTURE_2D);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            glDisableClientState(GL_VERTEX_ARRAY);
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+            glDisable(GL_TEXTURE_2D);
         }
 
+        glDisableClientState(GL_VERTEX_ARRAY);
 
     }
 
