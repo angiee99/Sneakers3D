@@ -261,6 +261,7 @@ public class OGLTexture2D implements OGLTexture {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         stbi_image_free(data);
+		System.out.println("Done with texture load");
 	}
 
 	public <OGLTexImageType extends OGLTexImage<OGLTexImageType>>

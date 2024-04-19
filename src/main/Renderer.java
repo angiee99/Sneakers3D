@@ -2,16 +2,16 @@ package main;
 
 import global.AbstractRenderer;
 import global.GLCamera;
+import lwjglutils.OGLModelOBJ;
 import lwjglutils.OGLTexture2D;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 
 import java.io.IOException;
 import java.nio.DoubleBuffer;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static global.GluUtils.gluLookAt;
 import static global.GluUtils.gluPerspective;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -28,7 +28,8 @@ import static org.lwjgl.opengl.GL15.*;
  * @since 2020-01-20
  */
 public class Renderer extends AbstractRenderer {
-    private List<Object3D> scene;
+    private List<OGLModelOBJ> scene;
+    private List<OGLTexture2D> textures;
     private int VBOVertices;
     private int VBOIndices;
 
@@ -39,6 +40,11 @@ public class Renderer extends AbstractRenderer {
     private float[] modelMatrix = new float[16];
     private boolean mouseButton1 = false;
     private float dx, dy, ox, oy;
+
+    private int vaoId, vboId, iboId, vaoIdOBJ, vaoIdTeapot;
+    OGLModelOBJ model;
+    OGLTexture2D texture;
+    private final int[] textureID = new int[3];
 
 
     public Renderer() {
@@ -198,20 +204,29 @@ public class Renderer extends AbstractRenderer {
     @Override
     public void init()  {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // background color
-
-        // load OBJ
-        OBJParser objParser = new OBJParser();
-        Optional<List<Object3D>> result = objParser.getObjectsByMaterial("res/data/obj/sneakers.obj");
-
-        result.ifPresent(object3DS -> scene = object3DS);
-        scene.remove(3); // remove some redundant planes from obj
-
         glEnable(GL_DEPTH_TEST);
 
         camera = new GLCamera();
         // setup initial position
         pz = 2;
         py = 0.3f;
+
+        vboId = glGenBuffers();
+        scene = new ArrayList<>();
+        textures = new ArrayList<>();
+
+        scene.add(new OBJLoader().loadObject("/data/obj/custom.obj"));
+
+        textureID[0] = glGenTextures();
+
+        glBindTexture(GL_TEXTURE_2D, textureID[0]);
+        System.out.println("Loading textures...");
+        try {
+            texture = new OGLTexture2D("data/textures/bacik_BaseColor.png"); // vzhledem k adresari res v projektu
+            textures.add(texture);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -222,7 +237,6 @@ public class Renderer extends AbstractRenderer {
 
         // calculate the view parameters
         trans += deltaTrans;
-
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
@@ -242,53 +256,28 @@ public class Renderer extends AbstractRenderer {
         glPushMatrix();
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-
-        for (Object3D object : scene){
-
-            int[] temp = new int[4];
-            int VBONorm, VBOTextures;
-            glGenBuffers(temp);
-
-            VBOVertices = temp[0];
-            glBindBuffer(GL_ARRAY_BUFFER, VBOVertices);
-            glBufferData(GL_ARRAY_BUFFER, object.getVertices(), GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, 0); //?
-
-            VBOIndices = temp[1];
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, object.getIndices(), GL_STATIC_DRAW);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //?
-
-//            VBONorm = temp[2];
-//            glBindBuffer(GL_ARRAY_BUFFER, VBONorm);
-//            glBufferData(GL_ARRAY_BUFFER, object.getNormals(), GL_STATIC_DRAW);
-//            glBindBuffer(GL_ARRAY_BUFFER, 0); //?
-//
-//            VBOTextures = temp[3];
-//            glBindBuffer(GL_ARRAY_BUFFER, VBOTextures);
-//            glBufferData(GL_ARRAY_BUFFER, object.getTexCoords(), GL_STATIC_DRAW);
-//            glBindBuffer(GL_ARRAY_BUFFER, 0); //?
-
-
-
+        for(int i = 0; i < scene.size(); i++){
+            glBindBuffer(GL_ARRAY_BUFFER, vboId);
             glEnableClientState(GL_VERTEX_ARRAY);
-//            glEnableClientState(GL_NORMAL_ARRAY);
-//            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-                glBindBuffer(GL_ARRAY_BUFFER, VBOVertices);
-                glVertexPointer(3, GL_FLOAT, 0, VBOVertices);
-//
-//                glBindBuffer(GL_ARRAY_BUFFER, VBONorm);
-//                glNormalPointer(GL_FLOAT, 0, 0);
-//
-//                glBindBuffer(GL_TEXTURE_BUFFER, VBOTextures);
-//                glTexCoordPointer(3, GL_FLOAT, 0, 0);
+//            glEnableClientState(GL_COLOR_ARRAY);
 
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
-                glDrawArrays(GL_TRIANGLES, 0, object.getIndices().capacity());
+
+            glEnable(GL_TEXTURE_2D);
+            texture.bind();
+//            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+            glDrawArrays(scene.get(i).getTopology(), 0,
+                    scene.get(i).getVerticesBuffer().limit());
+            glDisableClientState(GL_COLOR_ARRAY);
             glDisableClientState(GL_VERTEX_ARRAY);
-//            glDisableClientState(GL_NORMAL_ARRAY);
-//            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+            glDisable(GL_TEXTURE_2D);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
+
+
     }
 
 }
