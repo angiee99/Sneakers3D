@@ -216,6 +216,8 @@ public class Renderer extends AbstractRenderer {
         textures = new ArrayList<>();
 
         scene.add(new OBJLoader().loadObject("/data/obj/custom.obj"));
+//        scene.add(new OBJLoader().loadObject("/data/obj/custom2.obj"));
+//        scene.add(new OBJLoader().loadObject("/data/obj/custom3.obj"));
 
         textureID[0] = glGenTextures();
 
@@ -264,16 +266,16 @@ public class Renderer extends AbstractRenderer {
 
             glEnable(GL_TEXTURE_2D);
             texture.bind();
-//            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
             glDrawArrays(scene.get(i).getTopology(), 0,
                     scene.get(i).getVerticesBuffer().limit());
             glDisableClientState(GL_COLOR_ARRAY);
             glDisableClientState(GL_VERTEX_ARRAY);
 
-            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-            glDisable(GL_TEXTURE_2D);
+//            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+//
+//            glDisable(GL_TEXTURE_2D);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
 

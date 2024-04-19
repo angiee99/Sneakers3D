@@ -38,14 +38,14 @@ public class OBJLoader {
 //            glColorPointer(3, GL_FLOAT, 3 * 4, 0);
 //            glNormalPointer(GL_FLOAT, 3 * 4, 0);
 //        }
-//        fb = model.getTexCoordsBuffer();
-//        if (fb != null) {
-//            vboId = glGenBuffers();
-//            glBindBuffer(GL_ARRAY_BUFFER, vboId);
-//            fb.rewind();
-//            glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
-//            glTexCoordPointer(2, GL_FLOAT, 2 * 4, 0);
-//        }
+        fb = model.getTexCoordsBuffer();
+        if (fb != null) {
+            vboId = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, vboId);
+            fb.rewind();
+            glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
+            glTexCoordPointer(2, GL_FLOAT, 2 * 4, 0);
+        }
 
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
