@@ -16,9 +16,6 @@ import static global.GluUtils.gluPerspective;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-//import static org.lwjgl.opengl.GL31C.GL_TEXTURE_BUFFER;
-//import static org.lwjgl.stb.STBImage.stbi_image_free;
 
 
 /**
@@ -31,9 +28,6 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 public class Renderer extends AbstractRenderer {
     private List<OGLModelOBJ> scene;
     private List<OGLTexture2D> textures;
-    private int VBOVertices;
-    private int VBOIndices;
-
     private GLCamera camera;
     private float trans, deltaTrans = 0;
     private float px, py, pz;
@@ -41,17 +35,14 @@ public class Renderer extends AbstractRenderer {
     private float[] modelMatrix = new float[16];
     private boolean mouseButton1 = false;
     private float dx, dy, ox, oy;
-
-    private int vaoId, vboId, iboId, vaoIdOBJ, vaoIdTeapot;
-    OGLModelOBJ model;
     OGLTexture2D texture;
     private final int[] textureID = new int[3];
-    private int vboId1, vboId2, vboId3;
     private int[] vboIdList = new int[3];
 
 
     public Renderer() {
         super();
+        // REMOVE IF NOT MACOS USER
         width = width*2;
         height = height*2;
 
@@ -69,11 +60,9 @@ public class Renderer extends AbstractRenderer {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
-                    // We will detect this in our rendering loop
                     glfwSetWindowShouldClose(window, true);
                 if (action == GLFW_RELEASE) {
-//                    trans = 0;
-//                    deltaTrans = 0;
+
                 }
                 if (action == GLFW_PRESS) {
                     switch (key) {
@@ -214,7 +203,7 @@ public class Renderer extends AbstractRenderer {
         pz = 2;
         py = 0.3f;
 
-        vboId = glGenBuffers();
+        glGenBuffers(vboIdList);
         scene = new ArrayList<>();
         textures = new ArrayList<>();
 
@@ -265,18 +254,19 @@ public class Renderer extends AbstractRenderer {
         glEnableClientState(GL_VERTEX_ARRAY);
         for(int i = 0; i < scene.size(); i++){
             glBindBuffer(GL_ARRAY_BUFFER, vboIdList[i]);
-//            glEnableClientState(GL_COLOR_ARRAY);
-
             glEnable(GL_TEXTURE_2D);
+
             texture.bind();
+
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
             glDrawArrays(scene.get(i).getTopology(), 0,
                     scene.get(i).getVerticesBuffer().limit());
+
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             glDisableClientState(GL_VERTEX_ARRAY);
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
             glDisable(GL_TEXTURE_2D);
         }
 
