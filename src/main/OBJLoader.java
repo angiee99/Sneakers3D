@@ -15,16 +15,15 @@ public class OBJLoader {
     OGLModelOBJ model;
     public OGLModelOBJ loadObject(String filename){
         this.model= new OGLModelOBJ(filename);
-        this.pointer = glGenBuffers();
         return model;
     }
     public void bind(){
-        glBindBuffer(GL_ARRAY_BUFFER, pointer);
+        glBindBuffer(GL_ARRAY_BUFFER, Renderer.vboId);
 
         FloatBuffer fb = model.getVerticesBuffer();
         if (fb != null) {
-            pointer = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, pointer);
+            Renderer.vboId = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, Renderer.vboId);
             fb.rewind();
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
             glVertexPointer(4, GL_FLOAT, 0, 0);
@@ -40,8 +39,8 @@ public class OBJLoader {
 //        }
         fb = model.getTexCoordsBuffer();
         if (fb != null) {
-            pointer = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, pointer);
+            Renderer.vboId = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, Renderer.vboId);
             fb.rewind();
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
             glTexCoordPointer(2, GL_FLOAT, 2 * 4, 0);
@@ -49,5 +48,13 @@ public class OBJLoader {
 
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    public int getPointer() {
+        return pointer;
+    }
+
+    public OGLModelOBJ getModel() {
+        return model;
     }
 }

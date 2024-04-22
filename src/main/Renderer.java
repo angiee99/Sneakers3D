@@ -9,6 +9,7 @@ import org.lwjgl.glfw.*;
 
 import java.io.IOException;
 import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,8 @@ import static global.GluUtils.gluPerspective;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 
 /**
@@ -39,6 +42,8 @@ public class Renderer extends AbstractRenderer {
     private final int[] textureID = new int[3];
     private int[] vboIdList = new int[3];
     private List<OBJLoader> objList = new ArrayList<>();
+    int vaoId;
+    static int vboId;
 
     public Renderer() {
         super();
@@ -195,6 +200,11 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void init()  {
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 1);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // background color
         glEnable(GL_DEPTH_TEST);
 
@@ -202,8 +212,35 @@ public class Renderer extends AbstractRenderer {
         // setup initial position
         pz = 2;
         py = 0.3f;
+        float[] buffer = new float[] // 8 vertices: x,y,z,r,g,b;
+                {-1, -1, -1, 1f, 1f, 1f,
+                        -1, 1, -1, 0f, 0f, 1f,
+                        -1, -1, 1, 0f, 1f, 1f,
+                        -1, 1, 1, 0f, 1f, 0f,
+                        1, -1, 1, 1f, 1f, 0f,
+                        1, 1, 1, 1f, 0f, 0f,
+                        1, -1, -1, 1f, 0f, 1f,
+                        1, 1, -1, .5f, .5f, .5f};
 
-        glGenBuffers(vboIdList);
+        FloatBuffer vertexBufferDataBuffer = (FloatBuffer) BufferUtils
+                .createFloatBuffer(buffer.length)
+                .put(buffer)
+                .rewind();
+
+
+        vaoId = glGenVertexArrays();
+        glBindVertexArray(vaoId);
+        System.out.println(vaoId);
+        vboId = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vboId);
+        glBufferData(GL_ARRAY_BUFFER, vertexBufferDataBuffer, GL_STATIC_DRAW);
+
+        glVertexPointer(3, GL_FLOAT, 6 * 4, 0);
+        glColorPointer(3, GL_FLOAT, 6 * 4, 3 * 4);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
         scene = new ArrayList<>();
         textures = new ArrayList<>();
 
@@ -257,27 +294,42 @@ public class Renderer extends AbstractRenderer {
         glPushMatrix();
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        int solidArrayIndex =0;
+        glMatrixMode(GL_MODELVIEW);
+        glBindVertexArray(solidArrayIndex);
         glEnableClientState(GL_VERTEX_ARRAY);
-        for(int i = 0; i < scene.size(); i++){
-            glBindBuffer(GL_ARRAY_BUFFER, vboIdList[i]);
-            glEnable(GL_TEXTURE_2D);
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnable(GL_TEXTURE_2D);
+        texture.bind();
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-            objList.get(i).bind(); // ALWAYS the first one bid will be displayed
-            texture.bind();
-
-
-            glDrawArrays(scene.get(i).getTopology(), 0,
-                    scene.get(i).getVerticesBuffer().limit());
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-            glDisable(GL_TEXTURE_2D);
-        }
-
+        glDrawArrays(scene.get(solidArrayIndex).getTopology(), 0, scene.get(solidArrayIndex).getVerticesBuffer().limit());
         glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        glBindVertexArray(0);
+        glPopMatrix();
+
+        glDisable(GL_TEXTURE_2D);
+        glEnd();
+        solidArrayIndex++;
+//            glBindBuffer(GL_ARRAY_BUFFER, vboIdList[i]);
+//            glEnable(GL_TEXTURE_2D);
+//            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+//
+//            objList.get(i).bind(); // ALWAYS the first one bid will be displayed
+//            texture.bind();
+//
+//
+//            glDrawArrays(scene.get(i).getTopology(), 0,
+//                    scene.get(i).getVerticesBuffer().limit());
+//
+//            glBindBuffer(GL_ARRAY_BUFFER, 0);
+//
+//            glDisableClientState(GL_VERTEX_ARRAY);
+//            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+//            glDisable(GL_TEXTURE_2D);
+//            glEnd();
 
     }
 
