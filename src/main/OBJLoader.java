@@ -11,14 +11,14 @@ import static org.lwjgl.opengl.GL11.glVertexPointer;
 import static org.lwjgl.opengl.GL15.*;
 
 public class OBJLoader {
-    private int vboId, vaoIdOBJ;
-    OGLTexture2D texture;
-    public OGLModelOBJ loadObject(String filename, int pointer){
-
-
-        OGLModelOBJ model= new OGLModelOBJ(filename);
-
-        vaoIdOBJ = glGenBuffers();
+    private int pointer;
+    OGLModelOBJ model;
+    public OGLModelOBJ loadObject(String filename){
+        this.model= new OGLModelOBJ(filename);
+        this.pointer = glGenBuffers();
+        return model;
+    }
+    public void bind(){
         glBindBuffer(GL_ARRAY_BUFFER, pointer);
 
         FloatBuffer fb = model.getVerticesBuffer();
@@ -49,6 +49,5 @@ public class OBJLoader {
 
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        return model;
     }
 }

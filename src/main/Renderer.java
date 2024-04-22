@@ -38,7 +38,7 @@ public class Renderer extends AbstractRenderer {
     OGLTexture2D texture;
     private final int[] textureID = new int[3];
     private int[] vboIdList = new int[3];
-
+    private List<OBJLoader> objList = new ArrayList<>();
 
     public Renderer() {
         super();
@@ -207,10 +207,16 @@ public class Renderer extends AbstractRenderer {
         scene = new ArrayList<>();
         textures = new ArrayList<>();
 
+        OBJLoader obj1 = new OBJLoader();
+        OBJLoader obj2 = new OBJLoader();
+        OBJLoader obj3 = new OBJLoader();
+        objList.addAll(List.of(obj2, obj1, obj3));
 
-        scene.add(new OBJLoader().loadObject("/data/obj/custom2.obj", vboIdList[1]));
-        scene.add(new OBJLoader().loadObject("/data/obj/custom3.obj", vboIdList[2]));
-        scene.add(new OBJLoader().loadObject("/data/obj/custom1.obj", vboIdList[0]));
+
+        scene.add(obj2.loadObject("/data/obj/custom2.obj"));
+        scene.add(obj1.loadObject("/data/obj/custom1.obj"));
+        scene.add(obj3.loadObject("/data/obj/custom3.obj"));
+
 
         textureID[0] = glGenTextures();
 
@@ -255,10 +261,11 @@ public class Renderer extends AbstractRenderer {
         for(int i = 0; i < scene.size(); i++){
             glBindBuffer(GL_ARRAY_BUFFER, vboIdList[i]);
             glEnable(GL_TEXTURE_2D);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
+            objList.get(i).bind(); // ALWAYS the first one bid will be displayed
             texture.bind();
 
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
             glDrawArrays(scene.get(i).getTopology(), 0,
                     scene.get(i).getVerticesBuffer().limit());
