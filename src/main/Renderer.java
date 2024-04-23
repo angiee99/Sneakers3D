@@ -220,12 +220,12 @@ public class Renderer extends AbstractRenderer {
 
         camera = new GLCamera();
         // setup initial position
-        pz = 2;
-        py = 0.3f;
+        pz = 2.8f;
+        py = 0.6f;
+        px = 0.4f;
         // setup initial light position coord
-        mouseX = 620f;
-        mouseY = 360f;
-
+        mouseX = 820f;
+        mouseY = 560f;
 
         glGenBuffers(vboIdList);
         scene = new ArrayList<>();
