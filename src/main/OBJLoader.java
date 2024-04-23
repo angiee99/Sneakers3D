@@ -50,4 +50,12 @@ public class OBJLoader {
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
+
+    public int getPointer() {
+        return pointer;
+    }
+
+    public OGLModelOBJ getModel() {
+        return model;
+    }
 }

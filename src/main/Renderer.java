@@ -210,12 +210,17 @@ public class Renderer extends AbstractRenderer {
         OBJLoader obj1 = new OBJLoader();
         OBJLoader obj2 = new OBJLoader();
         OBJLoader obj3 = new OBJLoader();
-        objList.addAll(List.of(obj2, obj1, obj3));
+        objList.addAll(List.of(obj1, obj2, obj3));
 
-
-        scene.add(obj2.loadObject("/data/obj/custom2.obj"));
         scene.add(obj1.loadObject("/data/obj/custom1.obj"));
+        scene.add(obj2.loadObject("/data/obj/custom2.obj"));
         scene.add(obj3.loadObject("/data/obj/custom3.obj"));
+        /**
+         * obj2.loadObject("/data/obj/custom2.obj");
+         *         obj1.loadObject("/data/obj/custom1.obj");
+         *         obj3.loadObject("/data/obj/custom3.obj");
+         *         LIKE THIS NOTHING IS DISPLAYED
+         */
 
 
         textureID[0] = glGenTextures();
@@ -225,6 +230,8 @@ public class Renderer extends AbstractRenderer {
         try {
             texture = new OGLTexture2D("data/textures/bacik_BaseColor.png"); // vzhledem k adresari res v projektu
             textures.add(texture);
+            textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
+            textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -259,20 +266,19 @@ public class Renderer extends AbstractRenderer {
 
         glEnableClientState(GL_VERTEX_ARRAY);
         for(int i = 0; i < scene.size(); i++){
-            glBindBuffer(GL_ARRAY_BUFFER, vboIdList[i]);
+//            glBindBuffer(GL_ARRAY_BUFFER,i);
+            objList.get(i).bind();
             glEnable(GL_TEXTURE_2D);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-            objList.get(i).bind(); // ALWAYS the first one bid will be displayed
-            texture.bind();
+            textures.get(i).bind();
 
 
-            glDrawArrays(scene.get(i).getTopology(), 0,
-                    scene.get(i).getVerticesBuffer().limit());
+            glDrawArrays(objList.get(i).getModel().getTopology(), 0,
+                    objList.get(i).getModel().getVerticesBuffer().limit());
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            glDisableClientState(GL_VERTEX_ARRAY);
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
             glDisable(GL_TEXTURE_2D);
         }
