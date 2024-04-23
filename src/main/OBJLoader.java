@@ -28,22 +28,22 @@ public class OBJLoader {
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
             glVertexPointer(4, GL_FLOAT, 0, 0);
         }
-//        fb = model.getNormalsBuffer();
-//        if (fb != null) {
-//            vboId = glGenBuffers();
-//            glBindBuffer(GL_ARRAY_BUFFER, vboId);
-//            fb.rewind();
-//            glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
-//            glColorPointer(3, GL_FLOAT, 3 * 4, 0);
-//            glNormalPointer(GL_FLOAT, 3 * 4, 0);
-//        }
+        fb = model.getNormalsBuffer();
+        if (fb != null) {
+            pointer = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, pointer);
+            fb.rewind();
+            glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
+            glColorPointer(3, GL_FLOAT, 3 * 4, 0);
+            glNormalPointer(GL_FLOAT, 3 * 4, 0);
+        }
         fb = model.getTexCoordsBuffer();
         if (fb != null) {
             Renderer.vboId = glGenBuffers();
             glBindBuffer(GL_ARRAY_BUFFER, Renderer.vboId);
             fb.rewind();
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
-            glTexCoordPointer(2, GL_FLOAT, 2 * 4, 0);
+            glTexCoordPointer(2, GL_FLOAT, 0, 0);
         }
 
 
