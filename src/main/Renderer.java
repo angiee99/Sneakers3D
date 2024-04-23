@@ -215,22 +215,12 @@ public class Renderer extends AbstractRenderer {
         scene.add(obj1.loadObject("/data/obj/custom1.obj"));
         scene.add(obj2.loadObject("/data/obj/custom2.obj"));
         scene.add(obj3.loadObject("/data/obj/custom3.obj"));
-        /**
-         * obj2.loadObject("/data/obj/custom2.obj");
-         *         obj1.loadObject("/data/obj/custom1.obj");
-         *         obj3.loadObject("/data/obj/custom3.obj");
-         *         LIKE THIS NOTHING IS DISPLAYED
-         */
 
-
-        textureID[0] = glGenTextures();
-
-        glBindTexture(GL_TEXTURE_2D, textureID[0]);
         System.out.println("Loading textures...");
         try {
-            texture = new OGLTexture2D("data/textures/bacik_BaseColor.png"); // vzhledem k adresari res v projektu
+            texture = new OGLTexture2D("data/textures/govde_BaseColor.png");
             textures.add(texture);
-            textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
+            textures.add(new OGLTexture2D("data/textures/bacik_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -266,10 +256,10 @@ public class Renderer extends AbstractRenderer {
 
         glEnableClientState(GL_VERTEX_ARRAY);
         for(int i = 0; i < scene.size(); i++){
-//            glBindBuffer(GL_ARRAY_BUFFER,i);
             objList.get(i).bind();
             glEnable(GL_TEXTURE_2D);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+            glEnableClientState(GL_NORMAL_ARRAY);
 
             textures.get(i).bind();
 
@@ -279,6 +269,7 @@ public class Renderer extends AbstractRenderer {
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+            glDisableClientState(GL_NORMAL_ARRAY);
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
             glDisable(GL_TEXTURE_2D);
         }
