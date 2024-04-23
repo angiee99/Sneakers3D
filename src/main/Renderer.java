@@ -261,7 +261,12 @@ public class Renderer extends AbstractRenderer {
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluPerspective(45, width / (float) height, 0.1f, 100.0f);
+        if(perspective)
+            gluPerspective(45, width / (float) height, 0.1f, 100.0f);
+        else
+            glOrtho(-1* width / (float) height,
+                    1 * width / (float) height,
+                    -1, 1, 0.1f, 100.0f);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
