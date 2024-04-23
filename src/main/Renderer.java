@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static global.GluUtils.gluPerspective;
-import static global.GlutUtils.glutSolidSphere;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -35,6 +34,8 @@ public class Renderer extends AbstractRenderer {
     private float zenit, azimut;
     private float[] modelMatrix = new float[16];
     private boolean mouseButton1, mouseButton2 = false;
+    private boolean isWired, flatShading = false;
+    private boolean perspective = true;
     private float dx, dy, ox, oy;
     private int[] vboIdList = new int[3];
     private List<OBJLoader> objList = new ArrayList<>();
@@ -119,6 +120,16 @@ public class Renderer extends AbstractRenderer {
                                 deltaTrans = 0.001f;
                             else
                                 deltaTrans *= 1.01;
+                            break;
+
+                        case GLFW_KEY_L:
+                            flatShading = !flatShading;
+                            break;
+                        case GLFW_KEY_M:
+                            isWired = !isWired;
+                            break;
+                        case GLFW_KEY_P:
+                            perspective = !perspective;
                             break;
                     }
                 }
@@ -264,7 +275,11 @@ public class Renderer extends AbstractRenderer {
         glMultMatrixf(modelMatrix);
 
         glFrontFace(GL_CCW);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if(isWired)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        else
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 
         // back face culling
         glEnable(GL_CULL_FACE);
@@ -313,7 +328,9 @@ public class Renderer extends AbstractRenderer {
 
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-//        glShadeModel(GL_FLAT);
-        glShadeModel(GL_SMOOTH);
+        if(flatShading)
+            glShadeModel(GL_FLAT);
+        else
+            glShadeModel(GL_SMOOTH);
     }
 }
