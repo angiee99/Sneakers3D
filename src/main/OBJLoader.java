@@ -18,12 +18,12 @@ public class OBJLoader {
         return model;
     }
     public void bind(){
-        glBindBuffer(GL_ARRAY_BUFFER, Renderer.vboId);
+        glBindBuffer(GL_ARRAY_BUFFER, pointer);
 
         FloatBuffer fb = model.getVerticesBuffer();
         if (fb != null) {
-            Renderer.vboId = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, Renderer.vboId);
+            pointer = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, pointer);
             fb.rewind();
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
             glVertexPointer(4, GL_FLOAT, 0, 0);
@@ -39,8 +39,8 @@ public class OBJLoader {
         }
         fb = model.getTexCoordsBuffer();
         if (fb != null) {
-            Renderer.vboId = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, Renderer.vboId);
+            pointer = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, pointer);
             fb.rewind();
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
             glTexCoordPointer(2, GL_FLOAT, 0, 0);

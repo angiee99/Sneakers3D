@@ -36,7 +36,6 @@ public class Renderer extends AbstractRenderer {
     private boolean mouseButton1 = false;
     private float dx, dy, ox, oy;
     OGLTexture2D texture;
-    private final int[] textureID = new int[3];
     private int[] vboIdList = new int[3];
     private List<OBJLoader> objList = new ArrayList<>();
 
