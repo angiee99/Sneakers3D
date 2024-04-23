@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static global.GluUtils.gluPerspective;
+import static global.GlutUtils.glutSolidSphere;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -33,11 +34,11 @@ public class Renderer extends AbstractRenderer {
     private float px, py, pz;
     private float zenit, azimut;
     private float[] modelMatrix = new float[16];
-    private boolean mouseButton1 = false;
+    private boolean mouseButton1, mouseButton2 = false;
     private float dx, dy, ox, oy;
-    OGLTexture2D texture;
     private int[] vboIdList = new int[3];
     private List<OBJLoader> objList = new ArrayList<>();
+    private float mouseX, mouseY;
 
     public Renderer() {
         super();
@@ -136,10 +137,15 @@ public class Renderer extends AbstractRenderer {
                 double y = yBuffer.get(0);
 
                 mouseButton1 = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+                mouseButton2 = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
 
-                if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS) {
+                if (mouseButton1) {
                     ox = (float) x;
                     oy = (float) y;
+                }
+                else if (mouseButton2) {
+                    mouseX = (float) x;
+                    mouseY = (float) y;
                 }
             }
 
@@ -164,6 +170,10 @@ public class Renderer extends AbstractRenderer {
                     camera.setZenith(Math.toRadians(zenit));
                     dx = 0;
                     dy = 0;
+                }
+                else if(mouseButton2){
+                    mouseX = (float) x;
+                    mouseY = (float) y;
                 }
             }
         };
@@ -201,6 +211,10 @@ public class Renderer extends AbstractRenderer {
         // setup initial position
         pz = 2;
         py = 0.3f;
+        // setup initial light position coord
+        mouseX = 620f;
+        mouseY = 360f;
+
 
         glGenBuffers(vboIdList);
         scene = new ArrayList<>();
@@ -217,8 +231,7 @@ public class Renderer extends AbstractRenderer {
 
         System.out.println("Loading textures...");
         try {
-            texture = new OGLTexture2D("data/textures/govde_BaseColor.png");
-            textures.add(texture);
+            textures.add(new OGLTexture2D("data/textures/govde_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/bacik_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
         } catch (IOException e) {
@@ -229,7 +242,7 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void display() {
-        glViewport(0, 0, width, height); // *2 only for MacOS
+        glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
         // calculate the view parameters
@@ -250,9 +263,25 @@ public class Renderer extends AbstractRenderer {
         glTranslated(-px, -py, -pz);
         glMultMatrixf(modelMatrix);
 
-        glPushMatrix();
+        glFrontFace(GL_CCW);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        // back face culling
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
+        setupLight();
+
+        // lightning and shading mode
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+
+        drawScene();
+
+        glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHT0);
+    }
+    public void drawScene(){
         glEnableClientState(GL_VERTEX_ARRAY);
         for(int i = 0; i < scene.size(); i++){
             objList.get(i).bind();
@@ -274,7 +303,17 @@ public class Renderer extends AbstractRenderer {
         }
 
         glDisableClientState(GL_VERTEX_ARRAY);
-
     }
 
+    public void setupLight(){
+        float[] light_position;
+
+        // bod v prostoru
+        light_position = new float[]{ mouseX - width / 2f, height / 2f - mouseY, 25, 1.0f};
+
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+//        glShadeModel(GL_FLAT);
+        glShadeModel(GL_SMOOTH);
+    }
 }
