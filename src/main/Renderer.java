@@ -3,6 +3,7 @@ package main;
 import global.AbstractRenderer;
 import global.GLCamera;
 import lwjglutils.OGLModelOBJ;
+import lwjglutils.OGLTextRenderer;
 import lwjglutils.OGLTexture2D;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
@@ -34,12 +35,15 @@ public class Renderer extends AbstractRenderer {
     private float zenit, azimut;
     private float[] modelMatrix = new float[16];
     private boolean mouseButton1, mouseButton2 = false;
-    private boolean isWired, flatShading = false;
+    private boolean isWired, flatShading, rotation = false;
     private boolean perspective = true;
     private float dx, dy, ox, oy;
     private int[] vboIdList = new int[3];
     private List<OBJLoader> objList = new ArrayList<>();
     private float mouseX, mouseY;
+    private float uhel = 0;
+    private long oldmils, oldFPSmils;
+    private double fps;
 
     public Renderer() {
         super();
@@ -131,6 +135,9 @@ public class Renderer extends AbstractRenderer {
                         case GLFW_KEY_P:
                             perspective = !perspective;
                             break;
+                        case GLFW_KEY_R:
+                            rotation = !rotation;
+                            break;
                     }
                 }
             }
@@ -216,6 +223,14 @@ public class Renderer extends AbstractRenderer {
     @Override
     public void init()  {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // background color
+//        textRenderer = new OGLTextRenderer(width, height);
+        /** THROWS WEIRD ERROR
+         * New shader program '1' created
+         * VERT shader: Creating ... '2' OK,  Compiling '2'... Reading model file /data/obj/custom1.objfailed
+         * ERROR: 0:1: '' :  version '330' is not supported
+         * ERROR: 0:7: 'f' : syntax error: syntax error
+         */
+
         glEnable(GL_DEPTH_TEST);
 
         camera = new GLCamera();
@@ -258,18 +273,33 @@ public class Renderer extends AbstractRenderer {
 
         // calculate the view parameters
         trans += deltaTrans;
+        long mils = System.currentTimeMillis();
+        if ((mils - oldFPSmils) > 300) {
+            fps = 1000 / (double) (mils - oldmils + 1);
+            oldFPSmils = mils;
+        }
+
+        float speed = 15; // pocet stupnu rotace za vterinu
+        float step = speed * (mils - oldmils) / 1000.0f; // krok za jedno prekresleni
+        oldmils = mils;
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         if(perspective)
             gluPerspective(45, width / (float) height, 0.1f, 100.0f);
         else
-            glOrtho(-1* width / (float) height,
-                    1 * width / (float) height,
+            glOrtho(- width / (float) height,
+                    width / (float) height,
                     -1, 1, 0.1f, 100.0f);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+
+        // rotate the sneakers
+        if(rotation){
+            uhel = (uhel + step) % 360;
+            glRotatef(uhel, 0, 1, 0);
+        }
 
         glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
         glLoadIdentity();
@@ -278,6 +308,7 @@ public class Renderer extends AbstractRenderer {
         glRotatef(azimut, 0, 1.0f, 0);
         glTranslated(-px, -py, -pz);
         glMultMatrixf(modelMatrix);
+        glPushMatrix();
 
         glFrontFace(GL_CCW);
         if(isWired)
@@ -300,6 +331,8 @@ public class Renderer extends AbstractRenderer {
 
         glDisable(GL_LIGHTING);
         glDisable(GL_LIGHT0);
+
+        // text rendering for info
     }
     public void drawScene(){
         glEnableClientState(GL_VERTEX_ARRAY);
@@ -310,7 +343,6 @@ public class Renderer extends AbstractRenderer {
             glEnableClientState(GL_NORMAL_ARRAY);
 
             textures.get(i).bind();
-
 
             glDrawArrays(objList.get(i).getModel().getTopology(), 0,
                     objList.get(i).getModel().getVerticesBuffer().limit());
