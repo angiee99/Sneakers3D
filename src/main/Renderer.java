@@ -5,6 +5,7 @@ import global.GLCamera;
 import lwjglutils.OGLTexture2D;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
+import transforms.Mat4Identity;
 
 import java.io.IOException;
 import java.nio.DoubleBuffer;
@@ -31,13 +32,14 @@ public class Renderer extends AbstractRenderer {
     private float px, py, pz;
     private float zenit, azimut;
     private float[] modelMatrix = new float[16];
+    private float[] modelRotateMatrix = new float[16];
     private boolean mouseButton1, mouseButton2 = false;
     private boolean isWired, flatShading, rotation = false;
     private boolean perspective = true;
     private float dx, dy, ox, oy;
     private List<OBJLoader> objList = new ArrayList<>();
     private float mouseX, mouseY;
-    private float angle = 0;
+    private float angle, step = 0;
     private long oldmils, oldFPSmils;
 
     public Renderer() {
@@ -237,6 +239,10 @@ public class Renderer extends AbstractRenderer {
         mouseX = 820f;
         mouseY = 560f;
 
+        for (int i = 0; i < 4; i++) {
+            modelRotateMatrix[i*5] = 1;
+        }
+
         textures = new ArrayList<>();
 
         OBJLoader obj1 = new OBJLoader();
@@ -267,15 +273,7 @@ public class Renderer extends AbstractRenderer {
 
         // calculate the view parameters
         trans += deltaTrans;
-        long mils = System.currentTimeMillis();
-        if ((mils - oldFPSmils) > 300) {
-            double fps = 1000 / (double) (mils - oldmils + 1);
-            oldFPSmils = mils;
-        }
 
-        float speed = 15; // pocet stupnu rotace za vterinu
-        float step = speed * (mils - oldmils) / 1000.0f; // krok za jedno prekresleni
-        oldmils = mils;
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
@@ -291,8 +289,22 @@ public class Renderer extends AbstractRenderer {
 
         // rotate the sneakers
         if(rotation){
+            long mils = System.currentTimeMillis();
+            if ((mils - oldFPSmils) > 300) {
+                double fps = 1000 / (double) (mils - oldmils + 1); // fps usage
+                oldFPSmils = mils;
+            }
+
+            float speed = 15; // pocet stupnu rotace za vterinu
+            step = speed * (mils - oldmils) / 1000.0f; // krok za jedno prekresleni
+            oldmils = mils;
             angle = (angle + step) % 360;
             glRotatef(angle, 0, 1, 0);
+
+            glGetFloatv(GL_MODELVIEW_MATRIX, modelRotateMatrix);
+
+        }else{
+            oldmils = System.currentTimeMillis();
         }
 
         glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
@@ -301,6 +313,8 @@ public class Renderer extends AbstractRenderer {
         glRotatef(-zenit, 1.0f, 0, 0);
         glRotatef(azimut, 0, 1.0f, 0);
         glTranslated(-px, -py, -pz);
+        if(!rotation)
+            glMultMatrixf(modelRotateMatrix);
         glMultMatrixf(modelMatrix);
         glPushMatrix();
 
