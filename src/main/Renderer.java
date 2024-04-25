@@ -2,8 +2,6 @@ package main;
 
 import global.AbstractRenderer;
 import global.GLCamera;
-import lwjglutils.OGLModelOBJ;
-import lwjglutils.OGLTextRenderer;
 import lwjglutils.OGLTexture2D;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
@@ -27,7 +25,6 @@ import static org.lwjgl.opengl.GL15.*;
  * @since 2020-01-20
  */
 public class Renderer extends AbstractRenderer {
-    private List<OGLModelOBJ> scene;
     private List<OGLTexture2D> textures;
     private GLCamera camera;
     private float trans, deltaTrans = 0;
@@ -38,12 +35,10 @@ public class Renderer extends AbstractRenderer {
     private boolean isWired, flatShading, rotation = false;
     private boolean perspective = true;
     private float dx, dy, ox, oy;
-    private int[] vboIdList = new int[3];
     private List<OBJLoader> objList = new ArrayList<>();
     private float mouseX, mouseY;
-    private float uhel = 0;
+    private float angle = 0;
     private long oldmils, oldFPSmils;
-    private double fps;
 
     public Renderer() {
         super();
@@ -242,8 +237,6 @@ public class Renderer extends AbstractRenderer {
         mouseX = 820f;
         mouseY = 560f;
 
-        glGenBuffers(vboIdList);
-        scene = new ArrayList<>();
         textures = new ArrayList<>();
 
         OBJLoader obj1 = new OBJLoader();
@@ -251,9 +244,10 @@ public class Renderer extends AbstractRenderer {
         OBJLoader obj3 = new OBJLoader();
         objList.addAll(List.of(obj1, obj2, obj3));
 
-        scene.add(obj1.loadObject("/data/obj/custom1.obj"));
-        scene.add(obj2.loadObject("/data/obj/custom2.obj"));
-        scene.add(obj3.loadObject("/data/obj/custom3.obj"));
+        obj1.loadObject("/data/obj/custom1.obj");
+        obj2.loadObject("/data/obj/custom2.obj");
+        obj3.loadObject("/data/obj/custom3.obj");
+
 
         System.out.println("Loading textures...");
         try {
@@ -275,7 +269,7 @@ public class Renderer extends AbstractRenderer {
         trans += deltaTrans;
         long mils = System.currentTimeMillis();
         if ((mils - oldFPSmils) > 300) {
-            fps = 1000 / (double) (mils - oldmils + 1);
+            double fps = 1000 / (double) (mils - oldmils + 1);
             oldFPSmils = mils;
         }
 
@@ -297,8 +291,8 @@ public class Renderer extends AbstractRenderer {
 
         // rotate the sneakers
         if(rotation){
-            uhel = (uhel + step) % 360;
-            glRotatef(uhel, 0, 1, 0);
+            angle = (angle + step) % 360;
+            glRotatef(angle, 0, 1, 0);
         }
 
         glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
@@ -336,7 +330,7 @@ public class Renderer extends AbstractRenderer {
     }
     public void drawScene(){
         glEnableClientState(GL_VERTEX_ARRAY);
-        for(int i = 0; i < scene.size(); i++){
+        for(int i = 0; i < objList.size(); i++){
             objList.get(i).bind();
             glEnable(GL_TEXTURE_2D);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -358,6 +352,8 @@ public class Renderer extends AbstractRenderer {
     }
 
     public void setupLight(){
+        glPushMatrix();
+        glLoadIdentity();
         float[] light_position;
 
         // bod v prostoru
@@ -369,5 +365,6 @@ public class Renderer extends AbstractRenderer {
             glShadeModel(GL_FLAT);
         else
             glShadeModel(GL_SMOOTH);
+        glPopMatrix();
     }
 }
