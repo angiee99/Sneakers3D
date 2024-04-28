@@ -5,7 +5,6 @@ import global.GLCamera;
 import lwjglutils.OGLTexture2D;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
-import transforms.Mat4Identity;
 
 import java.io.IOException;
 import java.nio.DoubleBuffer;
@@ -15,7 +14,8 @@ import java.util.List;
 import static global.GluUtils.gluPerspective;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
 
 
 /**
@@ -37,7 +37,7 @@ public class Renderer extends AbstractRenderer {
     private boolean isWired, flatShading, rotation = false;
     private boolean perspective = true;
     private float dx, dy, ox, oy;
-    private List<OBJLoader> objList = new ArrayList<>();
+    private List<OBJModel> objList = new ArrayList<>();
     private float mouseX, mouseY;
     private float angle, step = 0;
     private long oldmils, oldFPSmils;
@@ -245,9 +245,10 @@ public class Renderer extends AbstractRenderer {
 
         textures = new ArrayList<>();
 
-        OBJLoader obj1 = new OBJLoader();
-        OBJLoader obj2 = new OBJLoader();
-        OBJLoader obj3 = new OBJLoader();
+        // init objects
+        OBJModel obj1 = new OBJModel();
+        OBJModel obj2 = new OBJModel();
+        OBJModel obj3 = new OBJModel();
         objList.addAll(List.of(obj1, obj2, obj3));
 
         obj1.loadObject("/data/obj/custom1.obj");
@@ -291,12 +292,11 @@ public class Renderer extends AbstractRenderer {
         if(rotation){
             long mils = System.currentTimeMillis();
             if ((mils - oldFPSmils) > 300) {
-                double fps = 1000 / (double) (mils - oldmils + 1); // fps usage
                 oldFPSmils = mils;
             }
 
-            float speed = 15; // pocet stupnu rotace za vterinu
-            step = speed * (mils - oldmils) / 1000.0f; // krok za jedno prekresleni
+            float speed = 15; // angles per second
+            step = speed * (mils - oldmils) / 1000.0f; // step for 1 render
             oldmils = mils;
             angle = (angle + step) % 360;
             glRotatef(angle, 0, 1, 0);
@@ -310,15 +310,18 @@ public class Renderer extends AbstractRenderer {
         glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
         glLoadIdentity();
 
+        // camera
         glRotatef(-zenit, 1.0f, 0, 0);
         glRotatef(azimut, 0, 1.0f, 0);
         glTranslated(-px, -py, -pz);
+
         if(!rotation)
             glMultMatrixf(modelRotateMatrix);
         glMultMatrixf(modelMatrix);
         glPushMatrix();
 
         glFrontFace(GL_CCW);
+
         if(isWired)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
