@@ -5,6 +5,7 @@ import global.GLCamera;
 import lwjglutils.OGLTexture2D;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
+import transforms.Vec3D;
 
 import java.io.IOException;
 import java.nio.DoubleBuffer;
@@ -183,8 +184,8 @@ public class Renderer extends AbstractRenderer {
                         zenit = -90;
                     azimut += dx / height * 180;
                     azimut = azimut % 360;
-                    camera.setAzimuth(Math.toRadians(azimut));
-                    camera.setZenith(Math.toRadians(zenit));
+//                    camera.setAzimuth(Math.toRadians(azimut));
+//                    camera.setZenith(Math.toRadians(zenit));
                     dx = 0;
                     dy = 0;
                 }
@@ -220,7 +221,8 @@ public class Renderer extends AbstractRenderer {
     }
 
     @Override
-    public void init()  {
+    public void init() throws IOException {
+        super.init();
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // background color
 //        textRenderer = new OGLTextRenderer(width, height);
         /** THROWS WEIRD ERROR
@@ -231,8 +233,13 @@ public class Renderer extends AbstractRenderer {
          */
 
         glEnable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glFrontFace(GL_CW);
+        glPolygonMode(GL_FRONT, GL_FILL);
+        glPolygonMode(GL_BACK, GL_FILL);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
 
-        camera = new GLCamera();
         // setup initial position
         pz = 2.8f;
         py = 0.6f;
@@ -257,6 +264,7 @@ public class Renderer extends AbstractRenderer {
         obj2.loadObject("/data/obj/custom2.obj");
         obj3.loadObject("/data/obj/custom3.obj");
 
+
         textureCube = new OGLTexture2D[6];
         System.out.println("Loading textures...");
         try {
@@ -280,13 +288,17 @@ public class Renderer extends AbstractRenderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
+        camera = new GLCamera();
+//        camera.setPosition(new Vec3D(10));
+//        camera.setFirstPerson(true);
+
         skyBox1();
     }
     private void skyBox1() {
         glNewList(1, GL_COMPILE);
         glPushMatrix();
         glColor3d(0.5, 0.5, 0.5);
-        int size = 600;
+        int size = 250;
         glutWireCube(size); //neni nutne, pouze pro znazorneni tvaru skyboxu
 
         glEnable(GL_TEXTURE_2D);
@@ -374,79 +386,68 @@ public class Renderer extends AbstractRenderer {
     @Override
     public void display() {
         glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
-        // calculate the view parameters
         trans += deltaTrans;
-
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        if(perspective)
-            gluPerspective(45, width / (float) height, 0.1f, 100.0f);
+        if (perspective)
+            gluPerspective(90, width / (float) height, 0.1f, 500.0f);
         else
-            glOrtho(- width / (float) height,
-                    width / (float) height,
-                    -1, 1, 0.1f, 100.0f);
+            glOrtho(-20 * width / (float) height,
+                    20 * width / (float) height,
+                    -20, 20, 0.1f, 500.0f);
+
+
+
+        GLCamera cameraSky = new GLCamera(camera);
+        cameraSky.setPosition(new Vec3D());
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+        glPushMatrix();
+//        camera.setMatrix();
 
-        // rotate the sneakers
-        if(rotation){
-            long mils = System.currentTimeMillis();
-            if ((mils - oldFPSmils) > 300) {
-                oldFPSmils = mils;
-            }
 
-            float speed = 15; // angles per second
-            step = speed * (mils - oldmils) / 1000.0f; // step for 1 render
-            oldmils = mils;
-            angle = (angle + step) % 360;
-            glRotatef(angle, 0, 1, 0);
+        glPopMatrix();
 
-            glGetFloatv(GL_MODELVIEW_MATRIX, modelRotateMatrix);
-
-        }else{
-            oldmils = System.currentTimeMillis();
-        }
-
-        glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
-        glLoadIdentity();
+        glPushMatrix();
+        cameraSky.setMatrix();
+        glCallList(1);
+//        if(!rotation)
+//            glMultMatrixf(modelRotateMatrix);
+//        glMultMatrixf(modelMatrix);
+//        glPushMatrix();
+//
+//        glFrontFace(GL_CCW);
+//
+//        if(isWired)
+//            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//        else
+//            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//
+//
+//        // back face culling
+//        glEnable(GL_CULL_FACE);
+//        glCullFace(GL_BACK);
 
         // camera
+        glPushMatrix();
+        glLoadIdentity();
         glRotatef(-zenit, 1.0f, 0, 0);
         glRotatef(azimut, 0, 1.0f, 0);
         glTranslated(-px, -py, -pz);
 
-        if(!rotation)
-            glMultMatrixf(modelRotateMatrix);
-        glMultMatrixf(modelMatrix);
-        glPushMatrix();
-
-        glFrontFace(GL_CCW);
-
-        if(isWired)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        else
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-
-        // back face culling
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
         setupLight();
-        // lightning and shading mode
+//        // lightning and shading mode
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
 
-        glPushMatrix();
-        glCallList(1);
-        glPopMatrix();
-
+        glScalef(0.5f, 0.5f, 1f);
         drawScene();
-
+//
         glDisable(GL_LIGHTING);
         glDisable(GL_LIGHT0);
 
