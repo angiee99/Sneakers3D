@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static global.GluUtils.gluPerspective;
+import static global.GlutUtils.glutWireCube;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
@@ -41,6 +42,7 @@ public class Renderer extends AbstractRenderer {
     private float mouseX, mouseY;
     private float angle, step = 0;
     private long oldmils, oldFPSmils;
+    private OGLTexture2D[] textureCube;
 
     public Renderer() {
         super();
@@ -255,15 +257,117 @@ public class Renderer extends AbstractRenderer {
         obj2.loadObject("/data/obj/custom2.obj");
         obj3.loadObject("/data/obj/custom3.obj");
 
-
+        textureCube = new OGLTexture2D[6];
         System.out.println("Loading textures...");
         try {
             textures.add(new OGLTexture2D("data/textures/govde_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/bacik_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
+
+            textureCube[0] = new OGLTexture2D("data/textures/snow_positive_x.jpg");
+            textureCube[1] = new OGLTexture2D("data/textures/snow_negative_x.jpg");
+            textureCube[2] = new OGLTexture2D("data/textures/snow_positive_y.jpg");
+            textureCube[3] = new OGLTexture2D("data/textures/snow_negative_y.jpg");
+            textureCube[4] = new OGLTexture2D("data/textures/snow_positive_z.jpg");
+            textureCube[5] = new OGLTexture2D("data/textures/snow_negative_z.jpg");
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        skyBox1();
+    }
+    private void skyBox1() {
+        glNewList(1, GL_COMPILE);
+        glPushMatrix();
+        glColor3d(0.5, 0.5, 0.5);
+        int size = 600;
+        glutWireCube(size); //neni nutne, pouze pro znazorneni tvaru skyboxu
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+        textureCube[1].bind(); //-x  (left)
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(-size, -size, -size);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(-size, size, -size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(-size, size, size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(-size, -size, size);
+        glEnd();
+
+        textureCube[0].bind();//+x  (right)
+        glBegin(GL_QUADS);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(size, -size, -size);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(size, -size, size);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(size, size, size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(size, size, -size);
+        glEnd();
+
+        textureCube[3].bind(); //-y bottom
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(-size, -size, -size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(size, -size, -size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(size, -size, size);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(-size, -size, size);
+        glEnd();
+
+        textureCube[2].bind(); //+y  top
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(-size, size, -size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(size, size, -size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(size, size, size);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(-size, size, size);
+        glEnd();
+
+        textureCube[5].bind(); //-z
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(size, -size, -size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(-size, -size, -size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(-size, size, -size);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(size, size, -size);
+        glEnd();
+
+        textureCube[4].bind(); //+z
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(-size, size, size);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(-size, -size, size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(size, -size, size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(size, size, size);
+        glEnd();
+
+        glDisable(GL_TEXTURE_2D);
+        glPopMatrix();
+
+        glEndList();
     }
 
 
@@ -333,10 +437,13 @@ public class Renderer extends AbstractRenderer {
         glCullFace(GL_BACK);
 
         setupLight();
-
         // lightning and shading mode
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
+
+        glPushMatrix();
+        glCallList(1);
+        glPopMatrix();
 
         drawScene();
 
