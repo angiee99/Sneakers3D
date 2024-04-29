@@ -184,8 +184,8 @@ public class Renderer extends AbstractRenderer {
                         zenit = -90;
                     azimut += dx / height * 180;
                     azimut = azimut % 360;
-//                    camera.setAzimuth(Math.toRadians(azimut));
-//                    camera.setZenith(Math.toRadians(zenit));
+                    camera.setAzimuth(Math.toRadians(azimut));
+                    camera.setZenith(Math.toRadians(zenit));
                     dx = 0;
                     dy = 0;
                 }
@@ -222,7 +222,7 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void init() throws IOException {
-        super.init();
+//        super.init();
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // background color
 //        textRenderer = new OGLTextRenderer(width, height);
         /** THROWS WEIRD ERROR
@@ -241,8 +241,8 @@ public class Renderer extends AbstractRenderer {
         glLoadIdentity();
 
         // setup initial position
-        pz = 2.8f;
-        py = 0.6f;
+        pz = 2f;
+        py = 1f;
         px = 0.4f;
         // setup initial light position coord
         mouseX = 820f;
@@ -387,7 +387,7 @@ public class Renderer extends AbstractRenderer {
     public void display() {
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         trans += deltaTrans;
 
@@ -400,54 +400,58 @@ public class Renderer extends AbstractRenderer {
                     20 * width / (float) height,
                     -20, 20, 0.1f, 500.0f);
 
-
-
         GLCamera cameraSky = new GLCamera(camera);
         cameraSky.setPosition(new Vec3D());
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glPushMatrix();
-//        camera.setMatrix();
-
-
-        glPopMatrix();
-
-        glPushMatrix();
         cameraSky.setMatrix();
         glCallList(1);
-//        if(!rotation)
-//            glMultMatrixf(modelRotateMatrix);
-//        glMultMatrixf(modelMatrix);
-//        glPushMatrix();
-//
-//        glFrontFace(GL_CCW);
-//
-//        if(isWired)
-//            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-//        else
-//            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//
-//
-//        // back face culling
-//        glEnable(GL_CULL_FACE);
-//        glCullFace(GL_BACK);
+
+        // rotate the sneakers
+        if(rotation){
+            long mils = System.currentTimeMillis();
+            if ((mils - oldFPSmils) > 300) {
+                oldFPSmils = mils;
+            }
+
+            float speed = 15; // angles per second
+            step = speed * (mils - oldmils) / 1000.0f; // step for 1 render
+            oldmils = mils;
+            angle = (angle + step) % 360;
+            glRotatef(angle, 0, 1, 0);
+
+            glGetFloatv(GL_MODELVIEW_MATRIX, modelRotateMatrix);
+
+        }else{
+            oldmils = System.currentTimeMillis();
+        }
+
+        glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
+        glLoadIdentity();
 
         // camera
-        glPushMatrix();
-        glLoadIdentity();
         glRotatef(-zenit, 1.0f, 0, 0);
         glRotatef(azimut, 0, 1.0f, 0);
         glTranslated(-px, -py, -pz);
 
+        if(!rotation)
+            glMultMatrixf(modelRotateMatrix);
+        glMultMatrixf(modelMatrix);
+
+        if(isWired)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        else
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+
         setupLight();
-//        // lightning and shading mode
+        // lightning and shading mode
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
 
-        glScalef(0.5f, 0.5f, 1f);
         drawScene();
-//
+
         glDisable(GL_LIGHTING);
         glDisable(GL_LIGHT0);
 
