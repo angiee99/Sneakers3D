@@ -36,7 +36,7 @@ public class Renderer extends AbstractRenderer {
     private float[] modelMatrix = new float[16];
     private float[] modelRotateMatrix = new float[16];
     private boolean mouseButton1, mouseButton2 = false;
-    private boolean isWired, flatShading, rotation = false;
+    private boolean isWired, flatShading, rotation, skybox = false;
     private boolean perspective = true;
     private float dx, dy, ox, oy;
     private List<OBJModel> objList = new ArrayList<>();
@@ -137,6 +137,9 @@ public class Renderer extends AbstractRenderer {
                             break;
                         case GLFW_KEY_R:
                             rotation = !rotation;
+                            break;
+                        case GLFW_KEY_B:
+                            skybox = !skybox;
                             break;
                     }
                 }
@@ -241,8 +244,8 @@ public class Renderer extends AbstractRenderer {
         glLoadIdentity();
 
         // setup initial position
-        pz = 2f;
-        py = 1f;
+        pz = 2.6f;
+        py = 0.7f;
         px = 0.4f;
         // setup initial light position coord
         mouseX = 820f;
@@ -302,7 +305,7 @@ public class Renderer extends AbstractRenderer {
         glutWireCube(size); //neni nutne, pouze pro znazorneni tvaru skyboxu
 
         glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_TEXTURE);
 
         textureCube[1].bind(); //-x  (left)
         glBegin(GL_QUADS);
@@ -394,7 +397,7 @@ public class Renderer extends AbstractRenderer {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         if (perspective)
-            gluPerspective(90, width / (float) height, 0.1f, 500.0f);
+            gluPerspective(45, width / (float) height, 0.1f, 500.0f);
         else
             glOrtho(-20 * width / (float) height,
                     20 * width / (float) height,
@@ -405,8 +408,10 @@ public class Renderer extends AbstractRenderer {
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        cameraSky.setMatrix();
-        glCallList(1);
+        if(skybox){
+            cameraSky.setMatrix();
+            glCallList(1);
+        }
 
         // rotate the sneakers
         if(rotation){
