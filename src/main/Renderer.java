@@ -275,12 +275,12 @@ public class Renderer extends AbstractRenderer {
             textures.add(new OGLTexture2D("data/textures/bacik_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
 
-            textureCube[0] = new OGLTexture2D("data/textures/skybox4.jpeg");
-            textureCube[1] = new OGLTexture2D("data/textures/skybox1.jpeg");
+            textureCube[0] = new OGLTexture2D("data/textures/skybox1.jpeg");
+            textureCube[1] = new OGLTexture2D("data/textures/skybox4.jpeg");
             textureCube[2] = new OGLTexture2D("data/textures/skybox0.jpeg");
             textureCube[3] = new OGLTexture2D("data/textures/skybox2.jpeg");
-            textureCube[4] = new OGLTexture2D("data/textures/skybox3.jpeg");
-            textureCube[5] = new OGLTexture2D("data/textures/skybox5.jpeg");
+            textureCube[4] = new OGLTexture2D("data/textures/skybox5.jpeg");
+            textureCube[5] = new OGLTexture2D("data/textures/skybox3.jpeg");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -401,9 +401,9 @@ public class Renderer extends AbstractRenderer {
         if (perspective)
             gluPerspective(45, width / (float) height, 0.1f, 500.0f);
         else
-            glOrtho(-20 * width / (float) height,
-                    20 * width / (float) height,
-                    -20, 20, 0.1f, 500.0f);
+            glOrtho(- width / (float) height,
+                    width / (float) height,
+                    -1, 1, 0.1f, 500.0f);
 
         GLCamera cameraSky = new GLCamera(camera);
         cameraSky.setPosition(new Vec3D());
