@@ -275,12 +275,12 @@ public class Renderer extends AbstractRenderer {
             textures.add(new OGLTexture2D("data/textures/bacik_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
 
-            textureCube[0] = new OGLTexture2D("data/textures/snow_positive_x.jpg");
-            textureCube[1] = new OGLTexture2D("data/textures/snow_negative_x.jpg");
-            textureCube[2] = new OGLTexture2D("data/textures/snow_positive_y.jpg");
-            textureCube[3] = new OGLTexture2D("data/textures/snow_negative_y.jpg");
-            textureCube[4] = new OGLTexture2D("data/textures/snow_positive_z.jpg");
-            textureCube[5] = new OGLTexture2D("data/textures/snow_negative_z.jpg");
+            textureCube[0] = new OGLTexture2D("data/textures/skybox4.jpeg");
+            textureCube[1] = new OGLTexture2D("data/textures/skybox1.jpeg");
+            textureCube[2] = new OGLTexture2D("data/textures/skybox0.jpeg");
+            textureCube[3] = new OGLTexture2D("data/textures/skybox2.jpeg");
+            textureCube[4] = new OGLTexture2D("data/textures/skybox3.jpeg");
+            textureCube[5] = new OGLTexture2D("data/textures/skybox5.jpeg");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -292,8 +292,8 @@ public class Renderer extends AbstractRenderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
         camera = new GLCamera();
-//        camera.setPosition(new Vec3D(10));
-//        camera.setFirstPerson(true);
+        camera.setPosition(new Vec3D(10));
+        camera.setFirstPerson(true);
 
         skyBox1();
     }
@@ -306,6 +306,8 @@ public class Renderer extends AbstractRenderer {
 
         glEnable(GL_TEXTURE_2D);
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_TEXTURE);
+
+        glScalef(0.3f, 0.3f, 1f);
 
         textureCube[1].bind(); //-x  (left)
         glBegin(GL_QUADS);
