@@ -42,6 +42,7 @@ public class Renderer extends AbstractRenderer {
     private List<OBJModel> objList = new ArrayList<>();
     private float mouseX, mouseY;
     private float angle, step = 0;
+    private int textureMode = 0;
     private long oldmils, oldFPSmils;
     private OGLTexture2D[] textureCube;
 
@@ -140,6 +141,13 @@ public class Renderer extends AbstractRenderer {
                             break;
                         case GLFW_KEY_B:
                             skybox = !skybox;
+                            break;
+                        case GLFW_KEY_T:
+                            if(textureMode == 6){
+                                textureMode = 0;
+                            }else {
+                                textureMode += 3;
+                            }
                             break;
                     }
                 }
@@ -274,6 +282,14 @@ public class Renderer extends AbstractRenderer {
             textures.add(new OGLTexture2D("data/textures/govde_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/bacik_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
+
+            textures.add(new OGLTexture2D("data/textures/govde_BaseColor2.png"));
+            textures.add(new OGLTexture2D("data/textures/bacik_BaseColor2.png"));
+            textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
+
+            textures.add(new OGLTexture2D("data/textures/govde_BaseColor3.png"));
+            textures.add(new OGLTexture2D("data/textures/bacik_BaseColor3.png"));
+            textures.add(new OGLTexture2D("data/textures/taban_BaseColor3.png"));
 
             textureCube[0] = new OGLTexture2D("data/textures/skybox1.jpeg");
             textureCube[1] = new OGLTexture2D("data/textures/skybox4.jpeg");
@@ -472,7 +488,7 @@ public class Renderer extends AbstractRenderer {
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             glEnableClientState(GL_NORMAL_ARRAY);
 
-            textures.get(i).bind();
+            textures.get(i + textureMode).bind();
 
             glDrawArrays(objList.get(i).getModel().getTopology(), 0,
                     objList.get(i).getModel().getVerticesBuffer().limit());
