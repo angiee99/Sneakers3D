@@ -21,5 +21,6 @@ Student project for FIM UHK, PGRF2
 ### Animation 
 - Use key R to start and pause the rotation of sneakers
 
-
+## Dependencies 
+- lwjgl-release-3.3  
 
