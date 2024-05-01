@@ -35,9 +35,9 @@ public class Renderer extends AbstractRenderer {
     private float zenit, azimut;
     private float[] modelMatrix = new float[16];
     private float[] modelRotateMatrix = new float[16];
-    private boolean mouseButton1, mouseButton2 = false;
-    private boolean isWired, flatShading, rotation, skybox = false;
-    private boolean perspective = true;
+    private boolean mouseButton1, mouseButton2;
+    private boolean isWired, flatShading;
+    private boolean perspective, skybox;
     private float dx, dy, ox, oy;
     private List<OBJModel> objList = new ArrayList<>();
     private float mouseX, mouseY;
@@ -250,6 +250,9 @@ public class Renderer extends AbstractRenderer {
         mouseX = 820f;
         mouseY = 560f;
 
+        skybox = true;
+        perspective = true;
+
         for (int i = 0; i < 4; i++) {
             modelRotateMatrix[i*5] = 1;
         }
@@ -310,7 +313,7 @@ public class Renderer extends AbstractRenderer {
         glPushMatrix();
         glColor3d(0.5, 0.5, 0.5);
         int size = 250;
-        glutWireCube(size); //neni nutne, pouze pro znazorneni tvaru skyboxu
+        glutWireCube(size);
 
         glEnable(GL_TEXTURE_2D);
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_TEXTURE);
