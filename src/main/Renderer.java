@@ -41,10 +41,9 @@ public class Renderer extends AbstractRenderer {
     private float dx, dy, ox, oy;
     private List<OBJModel> objList = new ArrayList<>();
     private float mouseX, mouseY;
-    private float angle, step = 0;
     private int textureMode = 0;
-    private long oldmils, oldFPSmils;
     private OGLTexture2D[] textureCube;
+    private RotationUtil rotationUtil;
 
     public Renderer() {
         super();
@@ -78,7 +77,7 @@ public class Renderer extends AbstractRenderer {
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
                             else
-                                deltaTrans *= 1.01;
+                                deltaTrans *= 1.01f;
                             break;
 
                         case GLFW_KEY_S:
@@ -87,7 +86,7 @@ public class Renderer extends AbstractRenderer {
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
                             else
-                                deltaTrans *= 1.01;
+                                deltaTrans *= 1.01f;
                             break;
 
                         case GLFW_KEY_A:
@@ -96,7 +95,7 @@ public class Renderer extends AbstractRenderer {
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
                             else
-                                deltaTrans *= 1.01;
+                                deltaTrans *= 1.01f;
                             break;
 
                         case GLFW_KEY_D:
@@ -105,7 +104,7 @@ public class Renderer extends AbstractRenderer {
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
                             else
-                                deltaTrans *= 1.01;
+                                deltaTrans *= 1.01f;
                             break;
                         case GLFW_KEY_LEFT_SHIFT:
 
@@ -114,7 +113,7 @@ public class Renderer extends AbstractRenderer {
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
                             else
-                                deltaTrans *= 1.01;
+                                deltaTrans *= 1.01f;
                             break;
 
                         case GLFW_KEY_LEFT_CONTROL:
@@ -124,7 +123,7 @@ public class Renderer extends AbstractRenderer {
                             if (deltaTrans < 0.001f)
                                 deltaTrans = 0.001f;
                             else
-                                deltaTrans *= 1.01;
+                                deltaTrans *= 1.01f;
                             break;
 
                         case GLFW_KEY_L:
@@ -137,7 +136,7 @@ public class Renderer extends AbstractRenderer {
                             perspective = !perspective;
                             break;
                         case GLFW_KEY_R:
-                            rotation = !rotation;
+                            rotationUtil.switchEnabled();
                             break;
                         case GLFW_KEY_B:
                             skybox = !skybox;
@@ -216,7 +215,7 @@ public class Renderer extends AbstractRenderer {
                     if (deltaTrans < 0.001f)
                         deltaTrans = 0.001f;
                     else
-                        deltaTrans *= 1.01;
+                        deltaTrans *= 1.01f;
                 }
                 else {
                     pz += trans;
@@ -224,7 +223,7 @@ public class Renderer extends AbstractRenderer {
                     if (deltaTrans < 0.001f)
                         deltaTrans = 0.001f;
                     else
-                        deltaTrans *= 1.01;
+                        deltaTrans *= 1.01f;
                 }
 
             }
@@ -233,15 +232,7 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void init() throws IOException {
-//        super.init();
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // background color
-//        textRenderer = new OGLTextRenderer(width, height);
-        /** THROWS WEIRD ERROR
-         * New shader program '1' created
-         * VERT shader: Creating ... '2' OK,  Compiling '2'... Reading model file /data/obj/custom1.objfailed
-         * ERROR: 0:1: '' :  version '330' is not supported
-         * ERROR: 0:7: 'f' : syntax error: syntax error
-         */
 
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
@@ -312,6 +303,7 @@ public class Renderer extends AbstractRenderer {
         camera.setFirstPerson(true);
 
         skyBox1();
+        rotationUtil = new RotationUtil();
     }
     private void skyBox1() {
         glNewList(1, GL_COMPILE);
@@ -432,23 +424,7 @@ public class Renderer extends AbstractRenderer {
         }
 
         // rotate the sneakers
-        if(rotation){
-            long mils = System.currentTimeMillis();
-            if ((mils - oldFPSmils) > 300) {
-                oldFPSmils = mils;
-            }
-
-            float speed = 15; // angles per second
-            step = speed * (mils - oldmils) / 1000.0f; // step for 1 render
-            oldmils = mils;
-            angle = (angle + step) % 360;
-            glRotatef(angle, 0, 1, 0);
-
-            glGetFloatv(GL_MODELVIEW_MATRIX, modelRotateMatrix);
-
-        }else{
-            oldmils = System.currentTimeMillis();
-        }
+        rotationUtil.applyRotation(modelRotateMatrix);
 
         glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
         glLoadIdentity();
@@ -458,7 +434,7 @@ public class Renderer extends AbstractRenderer {
         glRotatef(azimut, 0, 1.0f, 0);
         glTranslated(-px, -py, -pz);
 
-        if(!rotation)
+        if(!rotationUtil.isEnabled())
             glMultMatrixf(modelRotateMatrix);
         glMultMatrixf(modelMatrix);
 
@@ -478,7 +454,6 @@ public class Renderer extends AbstractRenderer {
         glDisable(GL_LIGHTING);
         glDisable(GL_LIGHT0);
 
-        // text rendering for info
     }
     public void drawScene(){
         glEnableClientState(GL_VERTEX_ARRAY);
