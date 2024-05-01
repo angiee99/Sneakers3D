@@ -273,24 +273,24 @@ public class Renderer extends AbstractRenderer {
         textureCube = new OGLTexture2D[6];
         System.out.println("Loading textures...");
         try {
-            textures.add(new OGLTexture2D("data/textures/govde_BaseColor.png"));
-            textures.add(new OGLTexture2D("data/textures/bacik_BaseColor.png"));
-            textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
+            textures.add(new OGLTexture2D("data/textures/objTextures/govde_BaseColor.png"));
+            textures.add(new OGLTexture2D("data/textures/objTextures/bacik_BaseColor.png"));
+            textures.add(new OGLTexture2D("data/textures/objTextures/taban_BaseColor.png"));
 
-            textures.add(new OGLTexture2D("data/textures/govde_BaseColor2.png"));
-            textures.add(new OGLTexture2D("data/textures/bacik_BaseColor2.png"));
-            textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
+            textures.add(new OGLTexture2D("data/textures/objTextures/govde_BaseColor2.png"));
+            textures.add(new OGLTexture2D("data/textures/objTextures/bacik_BaseColor2.png"));
+            textures.add(new OGLTexture2D("data/textures/objTextures/taban_BaseColor.png"));
 
-            textures.add(new OGLTexture2D("data/textures/govde_BaseColor3.png"));
-            textures.add(new OGLTexture2D("data/textures/bacik_BaseColor3.png"));
-            textures.add(new OGLTexture2D("data/textures/taban_BaseColor3.png"));
+            textures.add(new OGLTexture2D("data/textures/objTextures/govde_BaseColor3.png"));
+            textures.add(new OGLTexture2D("data/textures/objTextures/bacik_BaseColor3.png"));
+            textures.add(new OGLTexture2D("data/textures/objTextures/taban_BaseColor3.png"));
 
-            textureCube[0] = new OGLTexture2D("data/textures/skybox1.jpeg");
-            textureCube[1] = new OGLTexture2D("data/textures/skybox4.jpeg");
-            textureCube[2] = new OGLTexture2D("data/textures/skybox0.jpeg");
-            textureCube[3] = new OGLTexture2D("data/textures/skybox2.jpeg");
-            textureCube[4] = new OGLTexture2D("data/textures/skybox5.jpeg");
-            textureCube[5] = new OGLTexture2D("data/textures/skybox3.jpeg");
+            textureCube[0] = new OGLTexture2D("data/textures/skybox/skybox1.jpeg");
+            textureCube[1] = new OGLTexture2D("data/textures/skybox/skybox4.jpeg");
+            textureCube[2] = new OGLTexture2D("data/textures/skybox/skybox0.jpeg");
+            textureCube[3] = new OGLTexture2D("data/textures/skybox/skybox2.jpeg");
+            textureCube[4] = new OGLTexture2D("data/textures/skybox/skybox5.jpeg");
+            textureCube[5] = new OGLTexture2D("data/textures/skybox/skybox3.jpeg");
         } catch (IOException e) {
             e.printStackTrace();
         }
