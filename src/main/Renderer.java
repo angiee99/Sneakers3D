@@ -5,6 +5,7 @@ import global.GLCamera;
 import lwjglutils.OGLTexture2D;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
+import transforms.Vec3D;
 
 import java.io.IOException;
 import java.nio.DoubleBuffer;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static global.GluUtils.gluPerspective;
+import static global.GlutUtils.glutWireCube;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
@@ -34,13 +36,14 @@ public class Renderer extends AbstractRenderer {
     private float[] modelMatrix = new float[16];
     private float[] modelRotateMatrix = new float[16];
     private boolean mouseButton1, mouseButton2 = false;
-    private boolean isWired, flatShading, rotation = false;
+    private boolean isWired, flatShading, rotation, skybox = false;
     private boolean perspective = true;
     private float dx, dy, ox, oy;
     private List<OBJModel> objList = new ArrayList<>();
     private float mouseX, mouseY;
     private float angle, step = 0;
     private long oldmils, oldFPSmils;
+    private OGLTexture2D[] textureCube;
 
     public Renderer() {
         super();
@@ -135,6 +138,9 @@ public class Renderer extends AbstractRenderer {
                         case GLFW_KEY_R:
                             rotation = !rotation;
                             break;
+                        case GLFW_KEY_B:
+                            skybox = !skybox;
+                            break;
                     }
                 }
             }
@@ -218,7 +224,8 @@ public class Renderer extends AbstractRenderer {
     }
 
     @Override
-    public void init()  {
+    public void init() throws IOException {
+//        super.init();
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // background color
 //        textRenderer = new OGLTextRenderer(width, height);
         /** THROWS WEIRD ERROR
@@ -229,11 +236,16 @@ public class Renderer extends AbstractRenderer {
          */
 
         glEnable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glFrontFace(GL_CW);
+        glPolygonMode(GL_FRONT, GL_FILL);
+        glPolygonMode(GL_BACK, GL_FILL);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
 
-        camera = new GLCamera();
         // setup initial position
-        pz = 2.8f;
-        py = 0.6f;
+        pz = 2.6f;
+        py = 0.7f;
         px = 0.4f;
         // setup initial light position coord
         mouseX = 820f;
@@ -256,37 +268,152 @@ public class Renderer extends AbstractRenderer {
         obj3.loadObject("/data/obj/custom3.obj");
 
 
+        textureCube = new OGLTexture2D[6];
         System.out.println("Loading textures...");
         try {
             textures.add(new OGLTexture2D("data/textures/govde_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/bacik_BaseColor.png"));
             textures.add(new OGLTexture2D("data/textures/taban_BaseColor.png"));
+
+            textureCube[0] = new OGLTexture2D("data/textures/skybox1.jpeg");
+            textureCube[1] = new OGLTexture2D("data/textures/skybox4.jpeg");
+            textureCube[2] = new OGLTexture2D("data/textures/skybox0.jpeg");
+            textureCube[3] = new OGLTexture2D("data/textures/skybox2.jpeg");
+            textureCube[4] = new OGLTexture2D("data/textures/skybox5.jpeg");
+            textureCube[5] = new OGLTexture2D("data/textures/skybox3.jpeg");
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        camera = new GLCamera();
+        camera.setPosition(new Vec3D(10));
+        camera.setFirstPerson(true);
+
+        skyBox1();
+    }
+    private void skyBox1() {
+        glNewList(1, GL_COMPILE);
+        glPushMatrix();
+        glColor3d(0.5, 0.5, 0.5);
+        int size = 250;
+        glutWireCube(size); //neni nutne, pouze pro znazorneni tvaru skyboxu
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_TEXTURE);
+
+        glScalef(0.3f, 0.3f, 1f);
+
+        textureCube[1].bind(); //-x  (left)
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(-size, -size, -size);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(-size, size, -size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(-size, size, size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(-size, -size, size);
+        glEnd();
+
+        textureCube[0].bind();//+x  (right)
+        glBegin(GL_QUADS);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(size, -size, -size);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(size, -size, size);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(size, size, size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(size, size, -size);
+        glEnd();
+
+        textureCube[3].bind(); //-y bottom
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(-size, -size, -size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(size, -size, -size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(size, -size, size);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(-size, -size, size);
+        glEnd();
+
+        textureCube[2].bind(); //+y  top
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(-size, size, -size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(size, size, -size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(size, size, size);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(-size, size, size);
+        glEnd();
+
+        textureCube[5].bind(); //-z
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(size, -size, -size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(-size, -size, -size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(-size, size, -size);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(size, size, -size);
+        glEnd();
+
+        textureCube[4].bind(); //+z
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3d(-size, size, size);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3d(-size, -size, size);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3d(size, -size, size);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3d(size, size, size);
+        glEnd();
+
+        glDisable(GL_TEXTURE_2D);
+        glPopMatrix();
+
+        glEndList();
     }
 
 
     @Override
     public void display() {
         glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        // calculate the view parameters
         trans += deltaTrans;
-
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        if(perspective)
-            gluPerspective(45, width / (float) height, 0.1f, 100.0f);
+        if (perspective)
+            gluPerspective(45, width / (float) height, 0.1f, 500.0f);
         else
             glOrtho(- width / (float) height,
                     width / (float) height,
-                    -1, 1, 0.1f, 100.0f);
+                    -1, 1, 0.1f, 500.0f);
+
+        GLCamera cameraSky = new GLCamera(camera);
+        cameraSky.setPosition(new Vec3D());
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+        if(skybox){
+            cameraSky.setMatrix();
+            glCallList(1);
+        }
 
         // rotate the sneakers
         if(rotation){
@@ -318,9 +445,6 @@ public class Renderer extends AbstractRenderer {
         if(!rotation)
             glMultMatrixf(modelRotateMatrix);
         glMultMatrixf(modelMatrix);
-        glPushMatrix();
-
-        glFrontFace(GL_CCW);
 
         if(isWired)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -328,12 +452,7 @@ public class Renderer extends AbstractRenderer {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
-        // back face culling
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
         setupLight();
-
         // lightning and shading mode
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
