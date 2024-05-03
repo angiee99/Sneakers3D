@@ -23,9 +23,9 @@ import static org.lwjgl.opengl.GL15.glBindBuffer;
 /**
  * Simple scene rendering
  *
- * @author PGRF FIM UHK
- * @version 3.1
- * @since 2020-01-20
+ * @author Anhelina Kulkova
+ * @version 1.0
+ * @since 2024-05-05
  */
 public class Renderer extends AbstractRenderer {
     private List<OGLTexture2D> textures;
@@ -47,10 +47,6 @@ public class Renderer extends AbstractRenderer {
 
     public Renderer() {
         super();
-        // REMOVE IF NOT MACOS USER
-        width = width*2;
-        height = height*2;
-
         glfwWindowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int w, int h) {
@@ -231,7 +227,7 @@ public class Renderer extends AbstractRenderer {
     }
 
     @Override
-    public void init() throws IOException {
+    public void init() {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // background color
 
         glEnable(GL_DEPTH_TEST);
@@ -484,12 +480,10 @@ public class Renderer extends AbstractRenderer {
     public void setupLight(){
         glPushMatrix();
         glLoadIdentity();
-        float[] light_position;
+        float[] lightPosition;
+        lightPosition = new float[]{ mouseX - width, height - mouseY, 25, 1.0f};
 
-        // bod v prostoru
-        light_position = new float[]{ mouseX - width / 2f, height / 2f - mouseY, 25, 1.0f};
-
-        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+        glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
         if(flatShading)
             glShadeModel(GL_FLAT);
